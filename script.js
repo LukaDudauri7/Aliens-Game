@@ -17,10 +17,39 @@ class Player {
         if(this.x < 0) this.x = 0;
         else if(this.x > this.game.width - this.width) this.x = this.game.width - this.width;
     }
+    shoot(){
+        const projectile = this.game.getProjectile();
+        if(projectile) projectile.start(this.x, this.y);
+    }
 }
 
 class Projectile {
-
+    constructor() {
+        this.width = 4;
+        this.height = 20;
+        this.x = 0;
+        this.y = 0;
+        this.speed = 20;
+        this.free = true;
+    }
+    draw(context){
+        if(!this.free) {
+            context.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+    update() {
+        if(!this.free) {
+            this.y -= this.speed;
+        }
+    }
+    start(x, y){
+        this.x = x;
+        this.y = y;
+        this.free = false;
+    }
+    reset(){
+        this.free = true;
+    }
 }
 
 class Enemy {
@@ -35,9 +64,15 @@ class Game {
         this.keys = [];
         this.player = new Player(this);
 
+        this.projectilesPool = [];
+        this.numberOfProjectiles = 10;
+        this.createProjectile();
+        console.log(this.projectilesPool);
+
         //event listeners
         window.addEventListener('keydown', e => {
             if(this.keys.indexOf(e.key) === -1) this.keys.push(e.key);
+            if(e.key === '1') this.player.shoot();
         });
 
         window.addEventListener('keyup', e => {
@@ -48,6 +83,20 @@ class Game {
     render(context) {
         this.player.draw(context);
         this.player.update();
+        this.projectilesPool.forEach(projectile => {
+            projectile.update();
+            projectile.draw(context);
+        })
+    }
+    createProjectile(){
+        for(let i = 0; i < this.numberOfProjectiles; i++){
+            this.projectilesPool.push(new Projectile());
+        }
+    }
+    getProjectile(){
+        for(let i = 0; i < this.numberOfProjectiles; i++){
+            if(this.projectilesPool[i].free) return this.projectilesPool[i];
+        }
     }
 }
 

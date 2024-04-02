@@ -4,7 +4,7 @@ class Player {
         this.width = 100;
         this.height = 100;
         this.x = this.game.width * 0.5 - this.width * 0.5;
-        this.y = this.game.height * 0.8 - this.height;
+        this.y = this.game.height * 0.8;
         this.speed = 20;
     }
     draw(context) {
@@ -106,6 +106,7 @@ window.addEventListener('load', function () {
     const ctx = canvas.getContext('2d');
     canvas.width = 600;
     canvas.height = 800;
+    ctx.fillStyle = 'white';
 
     const game = new Game(canvas)
 

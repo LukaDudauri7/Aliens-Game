@@ -54,7 +54,38 @@ class Projectile {
 }
 
 class Enemy {
+    constructor(game) {
+        this.game = game;
+        this.width;
+        this.height;
+        this.x;
+        this.y;
+    }
+    draw(context) {
+        context.strokeRect(this.x, this.y, this.width, this.height);
+    }
+    update(){
 
+    }
+}
+
+class Wave{
+    constructor(game) {
+        this.game = game;
+        this.width = this.game.columns * this.game.enemySize;
+        this.height = this.game.rows * this.game.enemySize;
+        this.x = 0;
+        this.y = 0;
+        this.speedX = 3;
+        this.speedY = 0;
+    }
+    render(context){
+        context.strokeRect(this.x, this.y, this.width, this.height);
+        this.x += this.speedX;
+        if(this.x < 0 || this.x > this.game.width - this.width){
+            this.speedX *= -1;
+        }
+    }
 }
 
 class Game {
@@ -68,7 +99,13 @@ class Game {
         this.projectilesPool = [];
         this.numberOfProjectiles = 10;
         this.createProjectile();
-        console.log(this.projectilesPool);
+
+        this.columns = 3;
+        this.rows = 3;
+        this.enemySize = 60;
+
+        this.waves = [];
+        this.waves.push(new Wave(this));
 
         //event listeners
         window.addEventListener('keydown', e => {
@@ -87,6 +124,9 @@ class Game {
         this.projectilesPool.forEach(projectile => {
             projectile.update();
             projectile.draw(context);
+        })
+        this.waves.forEach(wave => {
+            wave.render(context);
         })
     }
     createProjectile(){
@@ -107,6 +147,8 @@ window.addEventListener('load', function () {
     canvas.width = 600;
     canvas.height = 800;
     ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 5;
 
     const game = new Game(canvas)
 

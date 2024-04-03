@@ -80,13 +80,13 @@ class Enemy {
         this.y = y + this.positionY; 
         //  check collision enemies - projectile
         this.game.projectilesPool.forEach(projectile => {
-            if(!projectile.free && this.game.checkCollision(this, projectile)){
+            if(!projectile.free && this.game.checkCollision(this, projectile) && this.lives > 0){
                 this.hit(1);
                 projectile.reset();
             }
         });
         if(this.lives < 1){
-            this.frameX++;
+            if(this.game.spriteUpdate) this.frameX++;
             if(this.frameX > this.maxFrame){
                 this.markedForDeletion = true;
                 if(!this.game.gameOver) this.game.score += this.maxLives;            
@@ -185,6 +185,10 @@ class Game {
         this.gameOver = false;
         this.waveCount = 1;
 
+        this.spriteUpdate = false;
+        this.spriteTimer = 0;
+        this.spriteInterval = 120;
+
         //event listeners
         window.addEventListener('keydown', e => {
             if(e.key === '1') this.player.shoot();
@@ -199,7 +203,15 @@ class Game {
             if(index > -1) this.keys.splice(index, 1);
         });
     }
-    render(context) {
+    render(context, deltaTime) {
+        //sprite timing
+        if(this.spriteTimer > this.spriteInterval){
+            this.spriteUpdate = true;
+            this.spriteTimer = 0;
+        } else{
+            this.spriteUpdate = false;
+            this.spriteTimer += deltaTime;
+        }
         this.drawStatusText(context);
         this.player.draw(context);
         this.player.update();
@@ -288,10 +300,13 @@ window.addEventListener('load', function () {
 
     const game = new Game(canvas)
 
-    function animate() {
+    let lastTime = 0;
+    function animate(timeStamp){
+        deltaTime = timeStamp - lastTime;
+        lastTime = timeStamp;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        game.render(ctx);
+        game.render(ctx, deltaTime);
         requestAnimationFrame(animate);
     }
-    animate();
+    animate(0);
 })

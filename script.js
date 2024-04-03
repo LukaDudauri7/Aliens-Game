@@ -54,18 +54,21 @@ class Projectile {
 }
 
 class Enemy {
-    constructor(game) {
+    constructor(game, positionX, positionY) {
         this.game = game;
-        this.width;
-        this.height;
-        this.x;
-        this.y;
+        this.width = this.game.enemySize;
+        this.height = this.game.enemySize;
+        this.x = 0;
+        this.y = 0;
+        this.positionX = positionX;
+        this.positionY = positionY;
     }
     draw(context) {
         context.strokeRect(this.x, this.y, this.width, this.height);
     }
-    update(){
-
+    update(x, y){
+        this.x = x + this.positionX; 
+        this.y = y + this.positionY; 
     }
 }
 
@@ -75,15 +78,34 @@ class Wave{
         this.width = this.game.columns * this.game.enemySize;
         this.height = this.game.rows * this.game.enemySize;
         this.x = 0;
-        this.y = 0;
+        this.y = -this.height;
         this.speedX = 3;
         this.speedY = 0;
+        this.enemies = [];
+        this.create();
     }
     render(context){
-        context.strokeRect(this.x, this.y, this.width, this.height);
+        if(this.y < 0) this.y +=5;
+        this.speedY = 0;
         this.x += this.speedX;
         if(this.x < 0 || this.x > this.game.width - this.width){
             this.speedX *= -1;
+            this.speedY = this.game.enemySize;
+        }
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.enemies.forEach(enemy => {
+            enemy.update(this.x, this.y);
+            enemy.draw(context);
+        })
+    }
+    create(){
+        for(let y = 0; y < this.game.rows; y++){
+            for(let x = 0; x < this.game.columns; x++){
+                let enemyX = x * this.game.enemySize;
+                let enemyY = y * this.game.enemySize;
+                this.enemies.push(new Enemy(this.game,enemyX, enemyY));
+            }
         }
     }
 }

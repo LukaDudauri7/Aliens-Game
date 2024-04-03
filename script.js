@@ -72,10 +72,16 @@ class Enemy {
         this.y = y + this.positionY; 
         //  check collision enemies - projectile
         this.game.projectilesPool.forEach(projectile => {
-            if(this.game.checkCollision(this, projectile)){
+            if(!projectile.free && this.game.checkCollision(this, projectile)){
                 this.markedForDeletion = true;
-            }
+                projectile.reset();
+                this.game.score++;            }
         });
+        // lose condition
+        if(this.y + this.height > this.game.height){
+            this.game.gameOver = true;
+            this.markedForDeletion = true;
+        }
     }
 }
 
@@ -137,6 +143,9 @@ class Game {
         this.waves = [];
         this.waves.push(new Wave(this));
 
+        this.score = 0;
+        this.gameOver = false;
+
         //event listeners
         window.addEventListener('keydown', e => {
             if(this.keys.indexOf(e.key) === -1) this.keys.push(e.key);
@@ -149,6 +158,7 @@ class Game {
         });
     }
     render(context) {
+        this.drawStatusText(context);
         this.player.draw(context);
         this.player.update();
         this.projectilesPool.forEach(projectile => {
@@ -178,6 +188,16 @@ class Game {
             a.y + a.height > b.y
         )
     }
+    drawStatusText(context){
+        context.save();
+        context.fillText('Score: ' + this.score, 20, 40);
+        if(this.gameOver){
+            context.textAlign = 'center';
+            context.font = '100px Imapct';
+            context.fillText('GAME OVER!', this.width * 0.5, this.height * 0.5);
+        }
+        context.restore();
+    }
 }
 
 window.addEventListener('load', function () {
@@ -188,6 +208,7 @@ window.addEventListener('load', function () {
     ctx.fillStyle = 'white';
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 5;
+    ctx.font = '30px Imapct';
 
     const game = new Game(canvas)
 

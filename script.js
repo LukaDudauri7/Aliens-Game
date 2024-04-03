@@ -71,7 +71,7 @@ class Enemy {
         this.markedForDeletion = false;
     }
     draw(context) {
-        context.strokeRect(this.x, this.y, this.width, this.height);
+        // context.strokeRect(this.x, this.y, this.width, this.height);
         context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, 
             this.width, this.height, this.x, this.y, this.width, this.height);
         }
@@ -81,11 +81,17 @@ class Enemy {
         //  check collision enemies - projectile
         this.game.projectilesPool.forEach(projectile => {
             if(!projectile.free && this.game.checkCollision(this, projectile)){
-                this.markedForDeletion = true;
+                this.hit(1);
                 projectile.reset();
-                if(!this.game.gameOver) this.game.score++;            
             }
         });
+        if(this.lives < 1){
+            this.frameX++;
+            if(this.frameX > this.maxFrame){
+                this.markedForDeletion = true;
+                if(!this.game.gameOver) this.game.score += this.maxLives;            
+            }
+        }
         // check collision enemies - player
         if(this.game.checkCollision(this, this.game.player)){
             this.markedForDeletion = true;
@@ -99,6 +105,9 @@ class Enemy {
             this.markedForDeletion = true;
         }
     }
+    hit(damage){
+        this.lives -= damage;
+    }
 }
 
 class Beetlemorph extends Enemy{
@@ -106,7 +115,10 @@ class Beetlemorph extends Enemy{
         super(game, positionX, positionY);
         this.image = document.getElementById('beetlemorph');
         this.frameX = 0;
-        this.frameY = 0;
+        this.maxFrame = 2;
+        this.frameY = Math.floor(Math.random() * 4);
+        this.lives = 1;
+        this.maxLives = this.lives;
     }
 }
 
@@ -115,18 +127,17 @@ class Wave{
         this.game = game;
         this.width = this.game.columns * this.game.enemySize;
         this.height = this.game.rows * this.game.enemySize;
-        this.x = 0;
+        this.x = this.game.width * 0.5 - this.width * 0.5;
         this.y = -this.height;
-        this.speedX = 3;
+        this.speedX = Math.random() < 0.5 ? -1 : 1;
         this.speedY = 0;
         this.enemies = [];
         this.nextWaveTrigger = false;
         this.create();
     }
     render(context){
-        if(this.y < 0) this.y +=5;
+        if(this.y < 0) this.y += 5;
         this.speedY = 0;
-        this.x += this.speedX;
         if(this.x < 0 || this.x > this.game.width - this.width){
             this.speedX *= -1;
             this.speedY = this.game.enemySize;

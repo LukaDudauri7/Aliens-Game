@@ -1,15 +1,18 @@
 class Player {
     constructor(game) {
         this.game = game;
-        this.width = 100;
-        this.height = 100;
+        this.width = 140;
+        this.height = 120;
         this.x = this.game.width * 0.5 - this.width * 0.5;
         this.y = this.game.height - this.height;
-        this.speed = 10;
+        this.speed = 5;
         this.lives = 3;
+        this.image = document.getElementById('player');
+        this.frameX = 0;
     }
     draw(context) {
-        context.fillRect(this.x, this.y, this.width, this.height);
+        // handle frame
+        context.drawImage(this.image, this.frameX * this.width, 0, this.width, this.height, this.x, this.y, this.width, this.height);
     }
     update() {
         if(this.game.keys.indexOf('ArrowLeft') > - 1) this.x -= this.speed;
@@ -31,7 +34,7 @@ class Player {
 
 class Projectile {
     constructor() {
-        this.width = 8;
+        this.width = 3;
         this.height = 40;
         this.x = 0;
         this.y = 0;
@@ -40,7 +43,10 @@ class Projectile {
     }
     draw(context){
         if(!this.free) {
+            context.save();
+            context.fillStyle = 'gold';
             context.fillRect(this.x, this.y, this.width, this.height);
+            context.restore();
         }
     }
     update() {
@@ -117,7 +123,7 @@ class Beetlemorph extends Enemy{
         this.frameX = 0;
         this.maxFrame = 2;
         this.frameY = Math.floor(Math.random() * 4);
-        this.lives = 1;
+        this.lives = 3;
         this.maxLives = this.lives;
     }
 }
